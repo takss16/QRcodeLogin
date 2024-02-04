@@ -86,16 +86,33 @@ class VitalsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateVitalsRequest $request, Vitals $vitals)
+    public function update(Vitals $vital, Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'pulse_rate' => 'required|numeric',
+            'body_temperature' => 'required|numeric',
+            'respiratory_rate' => 'required|numeric',
+            'bp' => 'required|string',
+            'bmi' => 'required|numeric',
+        ]);
+
+        // Update the vital record with the validated data
+        $vital->update($validatedData);
+
+        return redirect()->back()->with('success', 'Vitals updated successfully.');
     }
+
+
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Vitals $vitals)
+    public function destroy(Vitals $vital)
     {
-        //
+        $vital->delete();
+
+        return redirect()->back()->with('success', 'Vitals record deleted successfully.');
     }
+
 }

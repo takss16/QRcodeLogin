@@ -26,7 +26,7 @@ class VitalsSeeder extends Seeder
             ],
             [
                 'employee_id' => 002, // Replace with another employee_id
-                'month' => 'February',
+                'month' => 'January',
                 'year' => 2023,
                 'pulse_rate' => 75,
                 'body_temperature' => 98.2,

@@ -11,6 +11,16 @@
 </head>
 <body>
     <div class="container">
+        @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
         <div class="row my-5 g-4">
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card bg-dark bg-opacity-25">
@@ -51,20 +61,72 @@
             </div>
             <div class="col-12 col-sm-6 col-xl-9">
                 <div class="row row-cols-1 row-cols-xl-3 g-4">
-                    <div class="col">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="dropdown float-end">
-                                    <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
-                                        <i class="fa-solid fa-ellipsis"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item" href="#">Edit</a>
-                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#remove-modal">Remove</a>
-                                    </div>
-                                </div>
-                                @if($vitals->count() > 0)
-                                    @foreach($vitals as $vital)
+                    @if($vitals->count() > 0)
+                        @foreach($vitals->sortBy(function ($vital) {
+                            return DateTime::createFromFormat('F', $vital->month)->format('n');
+                        }) as $vital)
+                            <div class="col">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="dropdown float-end">
+                                            <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
+                                                <i class="fa-solid fa-ellipsis"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end">
+                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#edit-modal-{{ $vital->id }}"
+                                                    {{ $vital->month == now()->format('F') && $vital->year == now()->year ? '' : 'style=display:none;' }}>
+                                                    Edit
+                                                 </a>
+                                                                                                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#remove-modal">Remove</a>
+                                            </div>
+                                            <div class="modal fade" id="edit-modal-{{ $vital->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header bg-danger">
+                                                          <h1 class="modal-title fs-5 text-white fw-bold" id="exampleModalLabel">Edit Record for <b>{{ $vital->month }}, {{ $vital->year }}</b></h1>
+                                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <form action="{{ route('vitals.update', ['vital' => $vital->id]) }}" method="post">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <div class="modal-body">
+                                                                <div class="form-floating mb-3">
+                                                                    <input type="text" class="form-control" name="pulse_rate" value="{{ $vital->pulse_rate }}" placeholder="Pulse Rate">
+                                                                    <label for="pulse-rate">Pulse Rate</label>
+                                                                </div>
+
+                                                                <div class="form-floating mb-3">
+                                                                    <input type="text" class="form-control" name="body_temperature" value="{{ $vital->body_temperature }}" placeholder="Body Temperature">
+                                                                    <label for="body-temperature">Body Temperature (in degree celsius)</label>
+                                                                </div>
+
+                                                                <div class="form-floating mb-3">
+                                                                    <input type="text" class="form-control" name="respiratory_rate" value="{{ $vital->respiratory_rate }}" placeholder="Respiratory Rate">
+                                                                    <label for="respiratory-rate">Respiratory Rate</label>
+                                                                </div>
+
+                                                                <div class="form-floating mb-3">
+                                                                    <input type="text" class="form-control" name="bp" value="{{ $vital->bp }}" placeholder="Blood Pressure">
+                                                                    <label for="blood-pressure">Blood Pressure</label>
+                                                                </div>
+
+                                                                <div class="form-floating mb-3">
+                                                                    <input type="text" class="form-control" name="bmi" value="{{ $vital->bmi }}" placeholder="Body Mass Index">
+                                                                    <label for="body-mass-index">Body Mass Index</label>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-circle-xmark me-2"></i>Close</button>
+                                                            <button type="submit" class="btn btn-danger"><i class="fa-solid fa-floppy-disk me-2"></i>Save changes</button>
+                                                            </div>
+                                                        </form>
+                                                      </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
                                         <h5 class="card-title fw-bold text-danger">{{ $vital->month }}</h5>
                                         <p class="card-text">
                                             <ul class="list-unstyled ms-2">
@@ -79,35 +141,35 @@
                                                     <span class="badge rounded-pill text-bg-danger float-end">{{ $vital->body_temperature }} °C</span>
                                                 </li>
                                                 <li>
-                                                    <i class="fa-solid fa-fw fa-heart-pulse me-2"></i></i>
+                                                    <i class="fa-solid fa-fw fa-heart-pulse me-2"></i>
                                                     <span class="text-muted">Respiratory Rate: </span>
                                                     <span class="badge rounded-pill text-bg-danger float-end">{{ $vital->respiratory_rate }}  BPM</span>
                                                 </li>
                                                 <li>
-                                                    <i class="fa-solid fa-fw fa-droplet me-2"></i></i>
+                                                    <i class="fa-solid fa-fw fa-droplet me-2"></i>
                                                     <span class="text-muted">Blood Pressure: </span>
                                                     <span class="badge rounded-pill text-bg-danger float-end">{{ $vital->bp }} </span>
                                                 </li>
                                                 <li>
-                                                    <i class="fa-solid fa-fw fa-person me-2"></i></i>
+                                                    <i class="fa-solid fa-fw fa-person me-2"></i>
                                                     <span class="text-muted">Body Mass Index: </span>
                                                     <span class="badge rounded-pill text-bg-danger float-end">{{ $vital->bmi}} </span>
                                                 </li>
                                             </ul>
-                                            </p>
-                                        </div>
-                                    </div>
-                                            </ul>
                                         </p>
-                                    @endforeach
-                                @else
-                                    <p>No vitals recorded yet.</p>
-                                @endif
+                                    </div>
+                                </div>
                             </div>
+                        @endforeach
+                    @else
+                        <p>No vitals recorded yet.</p>
+                    @endif
                 </div>
             </div>
+
         </div>
     </div>
+
 
     <div class="modal fade" id="form-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -166,8 +228,13 @@
                 <p>Do you really want to delete this item? This process cannot be undone.</p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-circle-xmark me-2"></i>Close</button>
-              <button type="button" class="btn btn-danger"><i class="fa-solid fa-trash me-2"></i>Confirm Action</button>
+                <form action="{{ route('vitals.destroy', ['vital' => $vital->id]) }}" method="post">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-circle-xmark me-2"></i>Close</button>
+                    <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash me-2"></i>Confirm Action</button>
+                </form>
+
             </div>
           </div>
         </div>
