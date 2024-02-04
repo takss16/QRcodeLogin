@@ -1,0 +1,36 @@
+body {
+    background-image: url(../img/background.png);
+    background-attachment: fixed;
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    background-size: 700px;
+}
+
+/* Tablets (landscape) */
+@media only screen and (min-width: 768px) and (max-width: 1023px) {
+    body {
+        background-position: bottom center;
+        background-size: 450px;
+    }
+}
+
+/* Phones (portrait and landscape) and Tablets (portrait) */
+@media only screen and (max-width: 767px) {
+    body {
+      background: none;
+    }
+}
+
+.logo {
+    height: 150px;
+}
+
+#qr-box {
+    height: 300px;
+    background-color: #000;
+}
+
+.dropdown-toggle::after
+{
+  content: none;
+}
