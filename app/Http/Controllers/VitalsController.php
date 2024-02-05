@@ -103,8 +103,6 @@ class VitalsController extends Controller
     }
 
 
-
-
     /**
      * Remove the specified resource from storage.
      */
@@ -114,5 +112,14 @@ class VitalsController extends Controller
 
         return redirect()->back()->with('success', 'Vitals record deleted successfully.');
     }
+
+    /* public function filterVitals(Request $request)
+    {
+        $selectedYear = $request->input('selectedYear');
+
+        // Use $selectedYear to filter vitals or perform any other required logic
+
+        return view('dashboard', ['selectedYear' => $selectedYear]);
+    } */
 
 }

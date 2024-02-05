@@ -9,6 +9,13 @@
     <title>MCC Vitality Tracker</title>
 </head>
 <body>
+    @if(session('error'))
+    <div class="alert alert-danger text-center">
+        <div class="col-8">
+        {{ session('error') }}
+        </div>
+    </div>
+@endif
     <div class="container">
         <div class="row">
             <div class="col-12 col-xl-6 offset-xl-3 my-5">
@@ -34,18 +41,12 @@
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            let validEmployeeIds = @json($employee->pluck('employee_id')->toArray());
             let scanner = new Instascan.Scanner({ video: document.getElementById('scanner') });
 
             scanner.addListener('scan', function (content) {
-                if (validEmployeeIds.includes(content)) {
-                    // Redirect to the login route with the employee_id as a parameter
-                    window.location.href = '/login/' + content;
-                } else {
-                    alert('Authentication Failed: Invalid QR Code');
-                }
-            });
 
+                $employee_id = window.location.href = '/login/' + content;
+            });
             Instascan.Camera.getCameras().then(function (cameras) {
                 if (cameras.length > 0) {
                     scanner.start(cameras[0]);

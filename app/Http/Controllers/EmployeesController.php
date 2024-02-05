@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Vitals;
 use App\Models\Employees;
 use App\Http\Requests\StoreEmployeesRequest;
 use App\Http\Requests\UpdateEmployeesRequest;
@@ -10,21 +11,27 @@ class EmployeesController extends Controller
 {
     public function index()
     {
-        $employee = Employees::all();
-        return view('welcome', ['employee' => $employee]);
+        return view('welcome');
     }
-    // public function dashboard()
-    // {
-    //     $authenticatedUser = auth()->user();
-    //     $vitals = $authenticatedUser->vitals;
-    //     dd($vitals);
-    //     return view('dashboard', ['vitals' => $vitals]);
-    // }
+    public function dashboard($employee_id)
+    {
+
+        $authenticatedEmployee = Employees::where('employee_id', $employee_id)->first();
+                $existingVitals = $authenticatedEmployee->vitals()
+                    ->where('month', now()->format('F'))
+                    ->where('year', now()->year)
+                    ->exists();
+                $years = Vitals::distinct()->pluck('year')->toArray();
+                $vitalsExist = $existingVitals;
+                $vitals = $authenticatedEmployee->vitals;
+                 // Group vitals by year
+                 $groupedVitals = $vitals->groupBy('year');
+
+                return view('dashboard', ['employee' => $authenticatedEmployee, 'vitals' => $vitals, 'vitalsExist' => $vitalsExist, 'years' => $years, $groupedVitals]);
+    }
     /**
      * Display a listing of the resource.
      */
-
-
     /**
      * Show the form for creating a new resource.
      */

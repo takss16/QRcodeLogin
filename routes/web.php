@@ -18,14 +18,16 @@ use App\Http\Controllers\EmployeesController;
 
 Route::get('/', [EmployeesController::class, 'index'])->name('index');
 Route::get('/login/{employee_id}', [LoginController::class, 'login'])->name('login');
+Route::post('/dashboard/{employee_id}/vitals', [VitalsController::class, 'store'])->name('vitals.store');
+Route::put('/vitals/{vital}', [VitalsController::class, 'update'])->name('vitals.update');
+Route::get('/dashboard/{employee_id}', [EmployeesController::class, 'dashboard'])->name('dashboard');
+Route::delete('/vitals/{vital}', [VitalsController::class, 'destroy'])->name('vitals.destroy');
+/* Route::get('/dashboard/{employee_id}', [VitalsController::class, 'filterVitals'])->name('filter-vitals'); */
 
 
-Route::group(['middleware' => ['web', 'auth']], function () {
+// Route::group(['middleware' => ['web', 'auth']], function () {
 
-    Route::post('/dashboard/{employee_id}/vitals', [VitalsController::class, 'store'])->name('vitals.store');
-    Route::put('/vitals/{vital}', [VitalsController::class, 'update'])->name('vitals.update');
-    Route::get('/dashboard/{employee_id}', [EmployeesController::class, 'dashboard'])->name('dashboard');
-    Route::delete('/vitals/{vital}', [VitalsController::class, 'destroy'])->name('vitals.destroy');
-});
+
+// });
 Route::any('/logout', [LoginController::class, 'logout'])->name('logout');
 

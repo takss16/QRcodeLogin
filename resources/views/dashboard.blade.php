@@ -11,16 +11,6 @@
 </head>
 <body>
     <div class="container">
-        @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
         <div class="row my-5 g-4">
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card bg-dark bg-opacity-25">
@@ -46,12 +36,11 @@
                         <div class="w-100">
                             <label for="show-records" class="form-label">Show Records</label>
                             <select class="form-select form-select-lg mb-3" id="show-records">
-                                <option disabled>Select Year</option>
-                                <option value="2024" selected>2024</option>
-                                <option value="2025">2025</option>
-                                <option value="2026">2026</option>
+                                @foreach($years as $year)
+                                <option value="{{ $year }}">{{ $year }}</option>
+                                @endforeach
                             </select>
-                            <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#form-modal">
+                            <button type="button" class="btn btn-danger w-100"  >
                                 <i class="fa-solid fa-filter me-2"></i>
                                 Filter Vitality Records
                             </button>
@@ -66,7 +55,7 @@
                             return DateTime::createFromFormat('F', $vital->month)->format('n');
                         }) as $vital)
                             <div class="col">
-                                <div class="card h-100">
+                                <div class="card h-100 {{ $vital->month == now()->format('F') && $vital->year == now()->year ? 'border-danger' : '' }}">
                                     <div class="card-body">
                                         <div class="dropdown float-end">
                                             <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
@@ -77,7 +66,7 @@
                                                     {{ $vital->month == now()->format('F') && $vital->year == now()->year ? '' : 'style=display:none;' }}>
                                                     Edit
                                                  </a>
-                                                                                                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#remove-modal">Remove</a>
+                                                   <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#remove-modal">Remove</a>
                                             </div>
                                             <div class="modal fade" id="edit-modal-{{ $vital->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg">
@@ -228,12 +217,24 @@
                 <p>Do you really want to delete this item? This process cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <form action="{{ route('vitals.destroy', ['vital' => $vital->id]) }}" method="post">
-                    @csrf
-                    @method('DELETE')
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-circle-xmark me-2"></i>Close</button>
-                    <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash me-2"></i>Confirm Action</button>
-                </form>
+                @if(isset($vital))
+                    <form action="{{ route('vitals.destroy', ['vital' => $vital->id]) }}" method="post">
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-circle-xmark me-2"></i>Close
+                        </button>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa-solid fa-trash me-2"></i>Confirm Action
+                        </button>
+                    </form>
+                @else
+                    <!-- Handle the case where $vital is null -->
+                    <p>No vital record found.</p>
+                @endif
+
 
             </div>
           </div>

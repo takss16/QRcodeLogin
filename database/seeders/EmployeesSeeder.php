@@ -15,17 +15,12 @@ class EmployeesSeeder extends Seeder
         // Insert sample data into the 'employees' table
         DB::table('employees')->insert([
             [
-                'employee_id' => '001',
+                'employee_id' => 'asd',
                 'last_name' => 'Doe',
                 'first_name' => 'John',
                 'middle_name' => 'A',
             ],
-            [
-                'employee_id' => '002',
-                'last_name' => 'Smith',
-                'first_name' => 'Jane',
-                'middle_name' => 'B',
-            ],
+
         ]);
     }
 }
