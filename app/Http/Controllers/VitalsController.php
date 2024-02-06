@@ -37,16 +37,8 @@ class VitalsController extends Controller
             return redirect()->route('index')->with('error', 'Invalid Employee ID');
         }
 
-        $existingVitals = $authenticatedEmployee->vitals()
-            ->where('month', now()->format('F'))
-            ->where('year', now()->year)
-            ->exists();
-
-        if ($existingVitals) {
-            return redirect()->back()->with('error', 'Vitals already recorded for this month.');
-        }
-
         $validatedData = $request->validate([
+            'month' => 'required',
             'pulse_rate' => 'required|numeric',
             'body_temperature' => 'required|numeric',
             'respiratory_rate' => 'required|numeric',
@@ -54,9 +46,12 @@ class VitalsController extends Controller
             'bmi' => 'required|numeric',
         ]);
 
+        if ($authenticatedEmployee->vitals()->where('month', $validatedData['month'])->exists()) {
+            return redirect()->back()->with('error', 'Vitals already recorded for the selected month.');
+        }
 
         $authenticatedEmployee->vitals()->create([
-            'month' => now()->format('F'),
+            'month' => $validatedData['month'],
             'year' => now()->year,
             'pulse_rate' => $validatedData['pulse_rate'],
             'body_temperature' => $validatedData['body_temperature'],
@@ -108,6 +103,7 @@ class VitalsController extends Controller
      */
     public function destroy(Vitals $vital)
     {
+
         $vital->delete();
 
         return redirect()->back()->with('success', 'Vitals record deleted successfully.');

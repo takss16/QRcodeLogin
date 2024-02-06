@@ -21,7 +21,7 @@ Route::get('/login/{employee_id}', [LoginController::class, 'login'])->name('log
 Route::post('/dashboard/{employee_id}/vitals', [VitalsController::class, 'store'])->name('vitals.store');
 Route::put('/vitals/{vital}', [VitalsController::class, 'update'])->name('vitals.update');
 Route::get('/dashboard/{employee_id}', [EmployeesController::class, 'dashboard'])->name('dashboard');
-Route::delete('/vitals/{vital}', [VitalsController::class, 'destroy'])->name('vitals.destroy');
+Route::delete('/vitals/{vital}/destroy', [VitalsController::class, 'destroy'])->name('vitals.destroy');
 /* Route::get('/dashboard/{employee_id}', [VitalsController::class, 'filterVitals'])->name('filter-vitals'); */
 
 

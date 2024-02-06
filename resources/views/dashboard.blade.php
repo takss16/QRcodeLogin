@@ -10,6 +10,13 @@
     <title>MCC Vitality Tracker</title>
 </head>
 <body>
+    @if(session('error'))
+    <div class="alert alert-danger text-center">
+        <div class="col-8">
+        {{ session('error') }}
+        </div>
+    </div>
+    @endif
     <div class="container">
         <div class="row my-5 g-4">
             <div class="col-12 col-sm-6 col-xl-3">
@@ -20,7 +27,7 @@
                             <h2 class="fw-bold text-danger">MABALACAT CITY COLLEGE</h2>
                         </div>
                         <hr>
-                        <button type="button" class="btn btn-danger w-100 m-1" data-bs-toggle="modal" data-bs-target="#form-modal" {{ $vitalsExist ? 'disabled' : '' }}>
+                        <button type="button" class="btn btn-danger w-100 m-1" data-bs-toggle="modal" data-bs-target="#form-modal" {{ $vitalsExist && $vitalExistLastMonth ? 'disabled' : '' }}>
                             <i class="fa-solid fa-circle-plus me-2"></i>
                             Add New Record
                         </button>
@@ -34,16 +41,20 @@
                         </form>
                         <hr>
                         <div class="w-100">
-                            <label for="show-records" class="form-label">Show Records</label>
-                            <select class="form-select form-select-lg mb-3" id="show-records">
-                                @foreach($years as $year)
-                                <option value="{{ $year }}">{{ $year }}</option>
-                                @endforeach
-                            </select>
-                            <button type="button" class="btn btn-danger w-100"  >
-                                <i class="fa-solid fa-filter me-2"></i>
-                                Filter Vitality Records
-                            </button>
+                            <form action="{{ route('dashboard', ['employee_id' => $encryptedEmployeeId]) }}" method="GET">
+                                @csrf
+                                <label for="show-records" class="form-label">Show Records</label>
+                                <select class="form-select form-select-lg mb-3" id="show-records" name="selectedYear" >
+                                    <option>Please Select Year</option>
+                                    @foreach($years as $year)
+                                        <option value="{{ $year }}" {{ request('selectedYear') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fa-solid fa-filter me-2"></i>
+                                    Filter Vitality Records
+                                </button>
+                            </form>
                         </div>
                     </div>
                   </div>
@@ -66,7 +77,41 @@
                                                     {{ $vital->month == now()->format('F') && $vital->year == now()->year ? '' : 'style=display:none;' }}>
                                                     Edit
                                                  </a>
-                                                   <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#remove-modal">Remove</a>
+                                                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#remove-modal-{{ $vital->id }}">Remove</a>
+                                            </div>
+                                            <div class="modal fade" id="remove-modal-{{ $vital->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                                  <div class="modal-content">
+                                                    <div class="modal-header bg-danger">
+                                                      <h1 class="modal-title fs-5 text-white fw-bold" id="exampleModalLabel">Remove Record</h1>
+                                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h3>Are you sure?</h3>
+                                                        <p>Do you really want to delete this item? This process cannot be undone.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        @if(isset($vital))
+                                                            <form action="{{ route('vitals.destroy', ['vital' => $vital->id]) }}" method="post">
+                                                                @csrf
+                                                                @method('DELETE')
+
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                    <i class="fa-solid fa-circle-xmark me-2"></i>Close
+                                                                </button>
+
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fa-solid fa-trash me-2"></i>Confirm Action
+                                                                </button>
+                                                            </form>
+                                                        @else
+                                                            <p>No vital record found.</p>
+                                                        @endif
+
+
+                                                    </div>
+                                                  </div>
+                                                </div>
                                             </div>
                                             <div class="modal fade" id="edit-modal-{{ $vital->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg">
@@ -80,27 +125,27 @@
                                                             @method('PUT')
                                                             <div class="modal-body">
                                                                 <div class="form-floating mb-3">
-                                                                    <input type="text" class="form-control" name="pulse_rate" value="{{ $vital->pulse_rate }}" placeholder="Pulse Rate">
+                                                                    <input type="number" inputmode="numeric" class="form-control" name="pulse_rate" value="{{ $vital->pulse_rate }}" placeholder="Pulse Rate" required>
                                                                     <label for="pulse-rate">Pulse Rate</label>
                                                                 </div>
 
                                                                 <div class="form-floating mb-3">
-                                                                    <input type="text" class="form-control" name="body_temperature" value="{{ $vital->body_temperature }}" placeholder="Body Temperature">
+                                                                    <input type="number" inputmode="numeric" class="form-control" name="body_temperature" value="{{ $vital->body_temperature }}" placeholder="Body Temperature" required>
                                                                     <label for="body-temperature">Body Temperature (in degree celsius)</label>
                                                                 </div>
 
                                                                 <div class="form-floating mb-3">
-                                                                    <input type="text" class="form-control" name="respiratory_rate" value="{{ $vital->respiratory_rate }}" placeholder="Respiratory Rate">
+                                                                    <input type="number" inputmode="numeric" class="form-control" name="respiratory_rate" value="{{ $vital->respiratory_rate }}" placeholder="Respiratory Rate" required>
                                                                     <label for="respiratory-rate">Respiratory Rate</label>
                                                                 </div>
 
                                                                 <div class="form-floating mb-3">
-                                                                    <input type="text" class="form-control" name="bp" value="{{ $vital->bp }}" placeholder="Blood Pressure">
+                                                                    <input type="text" class="form-control" name="bp" value="{{ $vital->bp }}" placeholder="Blood Pressure" required>
                                                                     <label for="blood-pressure">Blood Pressure</label>
                                                                 </div>
 
                                                                 <div class="form-floating mb-3">
-                                                                    <input type="text" class="form-control" name="bmi" value="{{ $vital->bmi }}" placeholder="Body Mass Index">
+                                                                    <input type="text" class="form-control" name="bmi" value="{{ $vital->bmi }}" placeholder="Body Mass Index" required>
                                                                     <label for="body-mass-index">Body Mass Index</label>
                                                                 </div>
 
@@ -113,9 +158,8 @@
                                                       </div>
                                                 </div>
                                             </div>
-
-
                                         </div>
+
                                         <h5 class="card-title fw-bold text-danger">{{ $vital->month }}</h5>
                                         <p class="card-text">
                                             <ul class="list-unstyled ms-2">
@@ -170,24 +214,32 @@
                 <div class="modal-body">
                     <form action="{{ route('vitals.store', ['employee_id' => $employee->employee_id]) }}" method="post">
                         @csrf
+                        <select class="form-select form-select-lg mb-3" id="show-records" name="month">
+                            <option disabled selected>Select Month</option>
+                            @foreach (range(1,12) as $month)
+                                @if ($month <= date('n'))
+                                    <option value="{{ date("F", mktime(0, 0, 0, $month, 1)) }}" >{{ date("F", mktime(0, 0, 0, $month, 1)) }}</option>
+                                @endif
+                            @endforeach
+                        </select>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="pulse-rate" name="pulse_rate" placeholder="Pulse Rate">
+                            <input type="number" inputmode="numeric" class="form-control" id="pulse-rate" name="pulse_rate" placeholder="Pulse Rate" required>
                             <label for="pulse-rate">Pulse Rate</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="body-temperature" name="body_temperature" placeholder="Body Temperature">
+                            <input type="number" inputmode="numeric" class="form-control" id="body-temperature" name="body_temperature" placeholder="Body Temperature" required>
                             <label for="body-temperature">Body Temperature (in degree Celsius)</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="respiratory-rate" name="respiratory_rate" placeholder="Respiratory Rate">
+                            <input type="number" inputmode="numeric" class="form-control" id="respiratory-rate" name="respiratory_rate" placeholder="Respiratory Rate" required>
                             <label for="respiratory-rate">Respiratory Rate</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="blood-pressure" name="bp" placeholder="Blood Pressure">
+                            <input type="text" class="form-control" id="blood-pressure" name="bp" placeholder="Blood Pressure" required>
                             <label for="blood-pressure">Blood Pressure</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="body-mass-index" name="bmi" placeholder="Body Mass Index">
+                            <input type="text" class="form-control" id="body-mass-index" name="bmi" placeholder="Body Mass Index" required>
                             <label for="body-mass-index">Body Mass Index</label>
                         </div>
                         <div class="modal-footer">
@@ -204,42 +256,6 @@
         </div>
     </div>
 
-
-    <div class="modal fade" id="remove-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-          <div class="modal-content">
-            <div class="modal-header bg-danger">
-              <h1 class="modal-title fs-5 text-white fw-bold" id="exampleModalLabel">Remove Record</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <h3>Are you sure?</h3>
-                <p>Do you really want to delete this item? This process cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                @if(isset($vital))
-                    <form action="{{ route('vitals.destroy', ['vital' => $vital->id]) }}" method="post">
-                        @csrf
-                        @method('DELETE')
-
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fa-solid fa-circle-xmark me-2"></i>Close
-                        </button>
-
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash me-2"></i>Confirm Action
-                        </button>
-                    </form>
-                @else
-                    <!-- Handle the case where $vital is null -->
-                    <p>No vital record found.</p>
-                @endif
-
-
-            </div>
-          </div>
-        </div>
-    </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
